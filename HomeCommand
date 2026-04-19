@@ -1,0 +1,53 @@
+package com.example.joshomeplugin;
+
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+public class HomeCommand implements CommandExecutor {
+
+    private final JosHomePlugin plugin;
+
+    public HomeCommand(JosHomePlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("Эта команда только для игроков!");
+            return true;
+        }
+
+        Player player = (Player) sender;
+
+        switch (label.toLowerCase()) {
+            case "sethome":
+                plugin.setHome(player.getUniqueId(), player.getLocation());
+                player.sendMessage(ChatColor.GREEN + "Точка дома установлена!");
+                break;
+
+            case "home":
+                Location home = plugin.getHome(player.getUniqueId());
+                if (home == null) {
+                    player.sendMessage(ChatColor.RED + "У вас нет установленной точки дома. Используйте /sethome.");
+                } else {
+                    player.teleport(home);
+                    player.sendMessage(ChatColor.GREEN + "Вы телепортированы домой!");
+                }
+                break;
+
+            case "delhome":
+                plugin.deleteHome(player.getUniqueId());
+                player.sendMessage(ChatColor.GREEN + "Точка дома удалена!");
+                break;
+
+            default:
+                return false;
+        }
+        return true;
+    }
+}
