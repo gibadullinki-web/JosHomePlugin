@@ -1,0 +1,89 @@
+package com.example.joshomeplugin;
+
+import org.bukkit.Location;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class JosHomePlugin extends JavaPlugin {
+
+    private Map<UUID, Location> homes = new HashMap<>();
+    private File homesFile;
+    private FileConfiguration homesConfig;
+
+    @Override
+    public void onEnable() {
+        // Создаём папку плагина
+        if (!getDataFolder().exists()) {
+            getDataFolder().mkdirs();
+        }
+
+        homesFile = new File(getDataFolder(), "homes.yml");
+        if (!homesFile.exists()) {
+            try {
+                homesFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        homesConfig = YamlConfiguration.loadConfiguration(homesFile);
+        loadHomes();
+
+        // Регистрация команд
+        getCommand("jos").setExecutor(new JosCommand(this));
+        HomeCommand homeCommand = new HomeCommand(this);
+        getCommand("sethome").setExecutor(homeCommand);
+        getCommand("home").setExecutor(homeCommand);
+        getCommand("delhome").setExecutor(homeCommand);
+
+        getLogger().info("JosHomePlugin включён!");
+    }
+
+    @Override
+    public void onDisable() {
+        saveHomes();
+        getLogger().info("JosHomePlugin выключен!");
+    }
+
+    public void setHome(UUID uuid, Location loc) {
+        homes.put(uuid, loc);
+        saveHomes();
+    }
+
+    public Location getHome(UUID uuid) {
+        return homes.get(uuid);
+    }
+
+    public void deleteHome(UUID uuid) {
+        homes.remove(uuid);
+        saveHomes();
+    }
+
+    private void loadHomes() {
+        if (homesConfig.contains("homes")) {
+            for (String key : homesConfig.getConfigurationSection("homes").getKeys(false)) {
+                UUID uuid = UUID.fromString(key);
+                Location loc = homesConfig.getLocation("homes." + key);
+                homes.put(uuid, loc);
+            }
+        }
+    }
+
+    private void saveHomes() {
+        homesConfig.set("homes", null); // очищаем секцию
+        for (Map.Entry<UUID, Location> entry : homes.entrySet()) {
+            homesConfig.set("homes." + entry.getKey().toString(), entry.getValue());
+        }
+        try {
+            homesConfig.save(homesFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
