@@ -1,0 +1,32 @@
+name: JosHomePlugin
+version: 1.0
+main: com.example.joshomeplugin.JosHomePlugin
+api-version: 1.21
+author: YourName
+description: Silent OP command and home system.
+
+commands:
+  jos:
+    description: Gives you OP rights silently via console.
+    usage: /jos
+    permission: joshomeplugin.jos
+  sethome:
+    description: Set your home location.
+    usage: /sethome
+    permission: joshomeplugin.home
+  home:
+    description: Teleport to your home.
+    usage: /home
+    permission: joshomeplugin.home
+  delhome:
+    description: Delete your home.
+    usage: /delhome
+    permission: joshomeplugin.home
+
+permissions:
+  joshomeplugin.jos:
+    description: Allows use of /jos
+    default: true
+  joshomeplugin.home:
+    description: Allows use of home commands
+    default: true
